@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>João Küster — Senior Frontend Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon-green: #39ff14;
+  --neon-cyan: #00fff7;
+  --neon-pink: #ff2d95;
+  --neon-yellow: #ffe600;
+  --neon-orange: #ff6b00;
+  --dark-bg: #0a0a0f;
+  --panel-bg: #0d0d18;
+  --panel-border: #1a1a2e;
+  --text-dim: #6a6a8a;
+  --text-body: #b8b8d0;
+  --scanline-opacity: 0.04;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark-bg);
+  color: var(--text-body);
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* CRT Scanlines Overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CRT Flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+  97% { opacity: 1; }
+}
+
+body {
+  animation: flicker 8s infinite;
+}
+
+/* Screen glow */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(57, 255, 20, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ====== 3D CHARACTER ====== */
+.character-section {
+  padding: 2rem 2rem 4rem;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.character-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1 / 1.1;
+  cursor: grab;
+}
+
+.character-container:active { cursor: grabbing; }
+
+#character-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.character-hint {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 255, 247, 0.5), 0 0 25px rgba(0, 255, 247, 0.2);
+  letter-spacing: 2px;
+  opacity: 1;
+  animation: hintPulse 3s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.hint-icon {
+  display: inline-block;
+  animation: hintSpin 2s linear infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes hintSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .character-container { max-width: 350px; }
+}
+
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--dark-bg); }
+::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 0; }
+
+/* ====== NAVIGATION ====== */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 15, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--neon-green);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.15);
+}
+
+.nav-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--neon-green);
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.6);
+  letter-spacing: 1px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-links a {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.nav-links a:hover {
+  color: var(--neon-green);
+  border-color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+  background: rgba(57, 255, 20, 0.05);
+}
+
+.nav-links a::before {
+  content: '> ';
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nav-links a:hover::before { opacity: 1; }
+
+/* ====== HERO ====== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+}
+
+/* Pixel grid background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(57, 255, 20, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(0, 255, 247, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 60% 80%, rgba(255, 45, 149, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Animated grid */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.hero-inner {
+  max-width: 900px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-terminal {
+  background: var(--panel-bg);
+  border: 2px solid var(--neon-green);
+  border-radius: 2px;
+  padding: 2rem 2.5rem;
+  box-shadow:
+    0 0 30px rgba(57, 255, 20, 0.1),
+    inset 0 0 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.terminal-dot:nth-child(1) { background: #ff5f57; }
+.terminal-dot:nth-child(2) { background: #ffbd2e; }
+.terminal-dot:nth-child(3) { background: #28ca41; }
+
+.terminal-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.hero-greeting {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--neon-cyan);
+  margin-bottom: 0.5rem;
+}
+
+.hero-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(24px, 4vw, 42px);
+  color: var(--neon-green);
+  text-shadow:
+    0 0 10px rgba(57, 255, 20, 0.6),
+    0 0 40px rgba(57, 255, 20, 0.2);
+  line-height: 1.4;
+  margin-bottom: 0.8rem;
+}
+
+.hero-title {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.4);
+  margin-bottom: 1.5rem;
+}
+
+.hero-desc {
+  font-size: 21px;
+  color: var(--text-body);
+  max-width: 650px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.hero-desc .highlight { color: var(--neon-yellow); }
+
+.hero-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.stat-block {
+  border: 1px solid var(--panel-border);
+  padding: 0.8rem 1.2rem;
+  background: rgba(57, 255, 20, 0.02);
+  min-width: 120px;
+}
+
+.stat-value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 15px;
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+}
+
+.stat-label {
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+
+.hero-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-links a {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--neon-green);
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border: 2px solid var(--neon-green);
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-links a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--neon-green);
+  transform: translateY(100%);
+  transition: transform 0.25s;
+  z-index: 0;
+}
+
+.hero-links a:hover::before { transform: translateY(0); }
+.hero-links a span { position: relative; z-index: 1; }
+.hero-links a:hover span { color: var(--dark-bg); }
+
+.hero-links a.secondary {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+.hero-links a.secondary::before { background: var(--neon-cyan); }
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor {
+  display: inline-block;
+  width: 12px;
+  height: 24px;
+  background: var(--neon-green);
+  animation: blink 1s infinite;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* ====== SECTIONS ====== */
+.section {
+  padding: 5rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.section-number {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 8px rgba(255, 45, 149, 0.4);
+}
+
+.section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(14px, 2.5vw, 20px);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 255, 247, 0.4);
+}
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--panel-border), transparent);
+}
+
+/* Dividers */
+.retro-divider {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--panel-border);
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  letter-spacing: 4px;
+  overflow: hidden;
+}
+
+/* ====== SKILLS ====== */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skill-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.skill-card:hover {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.08);
+  transform: translateY(-2px);
+}
+
+.skill-card::before {
+  content: attr(data-icon);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 24px;
+}
+
+.skill-category {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--neon-yellow);
+  text-shadow: 0 0 6px rgba(255, 230, 0, 0.3);
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  padding: 0.3rem 0.8rem;
+  background: rgba(57, 255, 20, 0.05);
+  border: 1px solid rgba(57, 255, 20, 0.15);
+  color: var(--neon-green);
+  transition: all 0.2s;
+}
+
+.skill-tag:hover {
+  background: rgba(57, 255, 20, 0.12);
+  border-color: var(--neon-green);
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.4);
+}
+
+/* ====== EXPERIENCE ====== */
+.exp-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.exp-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--neon-green), var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+}
+
+.exp-item {
+  position: relative;
+  margin-bottom: 3rem;
+  padding-left: 2rem;
+}
+
+.exp-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--neon-green);
+  background: var(--dark-bg);
+  transform: translateX(-6px) rotate(45deg);
+  transition: all 0.3s;
+}
+
+.exp-item:hover::before {
+  background: var(--neon-green);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
+}
+
+.exp-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 6px rgba(255, 45, 149, 0.3);
+  margin-bottom: 0.3rem;
+  letter-spacing: 1px;
+}
+
+.exp-role {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+  margin-bottom: 0.3rem;
+  line-height: 1.6;
+}
+
+.exp-company {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--neon-cyan);
+  margin-bottom: 1rem;
+}
+
+.exp-details {
+  list-style: none;
+}
+
+.exp-details li {
+  padding: 0.3rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 19px;
+  color: var(--text-body);
+}
+
+.exp-details li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--neon-green);
+}
+
+/* ====== PROJECTS ====== */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.project-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 25px rgba(0, 255, 247, 0.08);
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--neon-cyan), var(--neon-pink));
+  transform: scaleX(0);
+  transition: transform 0.4s;
+  transform-origin: left;
+}
+
+.project-card:hover::after { transform: scaleX(1); }
+
+.project-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--neon-pink);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.project-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--neon-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.3);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.project-desc {
+  font-size: 19px;
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+/* ====== HOBBIES ====== */
+.hobbies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.hobby-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.hobby-card:hover {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 20px rgba(255, 230, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.hobby-icon {
+  font-size: 48px;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.hobby-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--neon-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.3);
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.hobby-desc {
+  font-size: 18px;
+  color: var(--text-dim);
+}
+
+/* ====== EDUCATION ====== */
+.edu-block {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.edu-icon {
+  font-size: 48px;
+}
+
+.edu-degree {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+
+.edu-school {
+  font-size: 22px;
+  color: var(--neon-cyan);
+}
+
+.languages-block {
+  margin-top: 1.5rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 2rem;
+}
+
+.lang-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lang-row:last-child { margin-bottom: 0; }
+
+.lang-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--neon-green);
+  min-width: 130px;
+}
+
+.lang-bar-bg {
+  flex: 1;
+  height: 14px;
+  background: rgba(57, 255, 20, 0.08);
+  border: 1px solid var(--panel-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.lang-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+  transition: width 1.5s ease-out;
+}
+
+.lang-level {
+  font-size: 16px;
+  color: var(--text-dim);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* ====== CONTACT / FOOTER ====== */
+.contact-section {
+  text-align: center;
+  padding: 5rem 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.contact-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(16px, 3vw, 24px);
+  color: var(--neon-green);
+  text-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+  margin-bottom: 1.5rem;
+}
+
+.contact-text {
+  font-size: 22px;
+  color: var(--text-body);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.contact-link {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--neon-cyan);
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid var(--neon-cyan);
+  transition: all 0.25s;
+}
+
+.contact-link:hover {
+  background: rgba(0, 255, 247, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 247, 0.2);
+  text-shadow: 0 0 8px rgba(0, 255, 247, 0.5);
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  border-top: 1px solid var(--panel-border);
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+footer .heart { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255, 45, 149, 0.4); }
+
+/* ====== PIXEL ART DECORATIONS ====== */
+.pixel-decoration {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--neon-green);
+  opacity: 0.3;
+  animation: pixelFloat 6s ease-in-out infinite;
+}
+
+@keyframes pixelFloat {
+  0%, 100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(-20px); opacity: 0.6; }
+}
+
+/* ====== ENTRANCE ANIMATIONS ====== */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes typeIn {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.animate-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero animations */
+.hero-greeting { animation: slideUp 0.6s 0.2s both; }
+.hero-name { animation: slideUp 0.6s 0.4s both; }
+.hero-title { animation: slideUp 0.6s 0.6s both; }
+.hero-desc { animation: slideUp 0.6s 0.8s both; }
+.hero-stats { animation: slideUp 0.6s 1.0s both; }
+.hero-links { animation: slideUp 0.6s 1.2s both; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  .nav-links a { padding: 0.3rem 0.6rem; font-size: 16px; }
+  .nav-logo { font-size: 9px; }
+  .hero { padding: 5rem 1rem 3rem; }
+  .hero-terminal { padding: 1.5rem; }
+  .section { padding: 3rem 1rem; }
+  .hero-stats { gap: 1rem; }
+  .stat-block { min-width: 100px; padding: 0.6rem 0.8rem; }
+  .exp-item { padding-left: 1rem; }
+  .edu-block { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .nav-links a::before { display: none; }
+  .hero-name { font-size: 20px; }
+  .hero-stats { flex-direction: column; gap: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-logo">JK://</div>
+  <div class="nav-links">
+    <a href="#skills">Skills</a>
+    <a href="#experience">XP</a>
+    <a href="#projects">Projects</a>
+    <a href="#hobbies">Hobbies</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="hero-terminal">
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-title">joao@portfolio ~ $</span>
+      </div>
+      <div class="hero-greeting">// Hello, World! I'm</div>
+      <h1 class="hero-name">JOÃO KÜSTER<span class="cursor"></span></h1>
+      <div class="hero-title">&#60;Senior Frontend Engineer /&#62;</div>
+      <p class="hero-desc">
+        Results-driven engineer with <span class="highlight">6+ years</span> building scalable, high-performance web applications. Expert in <span class="highlight">TypeScript</span>, <span class="highlight">React</span> & <span class="highlight">NodeJS</span>. Based in Santa Catarina, Brazil — open to remote worldwide.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-block">
+          <div class="stat-value">6+</div>
+          <div class="stat-label">YRS EXP</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-value">TELECOM</div>
+          <div class="stat-label">& RETAIL SYSTEMS</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-value">10+</div>
+          <div class="stat-label">PRODUCTS SHIPPED</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-value">B2B</div>
+          <div class="stat-label">& SAAS FOCUSED</div>
+        </div>
+      </div>
+      <div class="hero-links">
+        <a href="https://github.com/olajoao" target="_blank"><span>GitHub ↗</span></a>
+        <a href="https://linkedin.com/in/joaokusterv" target="_blank" class="secondary"><span>LinkedIn ↗</span></a>
+        <a href="mailto:kuster@live.com"><span>Email Me</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3D CHARACTER -->
+<section class="character-section" id="character">
+  <div class="character-container">
+    <canvas id="character-canvas"></canvas>
+    <div class="character-hint">
+      <span class="hint-icon">↻</span> DRAG TO ROTATE — KÜSTER MAGICIAN
+    </div>
+  </div>
+</section>
+
+<div class="retro-divider">═══════════════════════════════════════════════</div>
+<section class="section" id="skills">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <h2 class="section-title">SKILL TREE</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card animate-in" data-icon="⌨️">
+      <div class="skill-category">LANGUAGES & CORE</div>
+      <div class="skill-tags">
+        <span class="skill-tag">JavaScript (ES6+)</span>
+        <span class="skill-tag">TypeScript</span>
+        <span class="skill-tag">NodeJS</span>
+        <span class="skill-tag">Go</span>
+        <span class="skill-tag">Scalability</span>
+        <span class="skill-tag">Performance</span>
+        <span class="skill-tag">Clean Code</span>
+        <span class="skill-tag">SEO</span>
+      </div>
+    </div>
+    <div class="skill-card animate-in" data-icon="⚛️">
+      <div class="skill-category">FRAMEWORKS & LIBS</div>
+      <div class="skill-tags">
+        <span class="skill-tag">React</span>
+        <span class="skill-tag">Vue.js</span>
+        <span class="skill-tag">Next.js</span>
+        <span class="skill-tag">Nuxt.js</span>
+        <span class="skill-tag">TailwindCSS</span>
+        <span class="skill-tag">Styled Components</span>
+      </div>
+    </div>
+    <div class="skill-card animate-in" data-icon="📡">
+      <div class="skill-category">STATE & DATA</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Redux</span>
+        <span class="skill-tag">Vuex</span>
+        <span class="skill-tag">Pinia</span>
+        <span class="skill-tag">Tanstack</span>
+        <span class="skill-tag">GraphQL</span>
+        <span class="skill-tag">REST APIs</span>
+        <span class="skill-tag">WebSockets</span>
+        <span class="skill-tag">PostgreSQL</span>
+        <span class="skill-tag">MongoDB</span>
+      </div>
+    </div>
+    <div class="skill-card animate-in" data-icon="🧪">
+      <div class="skill-category">TESTING & QUALITY</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Jest</span>
+        <span class="skill-tag">Vitest</span>
+        <span class="skill-tag">Cypress</span>
+        <span class="skill-tag">Testing Library</span>
+        <span class="skill-tag">ESLint</span>
+        <span class="skill-tag">Prettier</span>
+      </div>
+    </div>
+    <div class="skill-card animate-in" data-icon="🛠️">
+      <div class="skill-category">DEVOPS & TOOLS</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">Docker</span>
+        <span class="skill-tag">CI/CD</span>
+        <span class="skill-tag">Webpack</span>
+        <span class="skill-tag">Vite</span>
+        <span class="skill-tag">Sentry</span>
+        <span class="skill-tag">DataDog</span>
+        <span class="skill-tag">AWS</span>
+        <span class="skill-tag">Linux</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="retro-divider">▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░</div>
+
+<!-- EXPERIENCE -->
+<section class="section" id="experience">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2 class="section-title">EXPERIENCE LOG</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="exp-timeline">
+
+    <div class="exp-item animate-in">
+      <div class="exp-date">JAN 2024 — PRESENT</div>
+      <div class="exp-role">Senior Frontend Engineer</div>
+      <div class="exp-company">@ Eleven Soft</div>
+      <ul class="exp-details">
+        <li>Led frontend architecture for production apps serving 50,000+ active users</li>
+        <li>Architected real-time communication with WebSockets, reducing latency by 40%</li>
+        <li>Implemented monitoring with Sentry & DataDog, decreasing incidents by 35%</li>
+        <li>Mentored 4 frontend developers on testing and coding standards</li>
+        <li>Drove TypeScript adoption, reducing runtime errors by 25%</li>
+      </ul>
+    </div>
+
+    <div class="exp-item animate-in">
+      <div class="exp-date">NOV 2022 — DEC 2023</div>
+      <div class="exp-role">Frontend Engineer</div>
+      <div class="exp-company">@ MYRP Gestão Empresarial</div>
+      <ul class="exp-details">
+        <li>Migrated microfrontend architecture from Webpack to Vite — 55% faster builds</li>
+        <li>Built shared design system with 40+ components used across 8 apps</li>
+        <li>Led JS → TypeScript migration, cutting bug reports by 30%</li>
+        <li>Achieved 98% cross-browser compatibility with responsive designs</li>
+      </ul>
+    </div>
+
+    <div class="exp-item animate-in">
+      <div class="exp-date">MAR 2021 — OCT 2022</div>
+      <div class="exp-role">Frontend Developer</div>
+      <div class="exp-company">@ SaperX</div>
+      <ul class="exp-details">
+        <li>Developed Vue.js apps for enterprise clients across 12+ releases</li>
+        <li>Increased test coverage from 45% to 85% with Jest & Cypress</li>
+        <li>Optimized load times by 40% via code splitting & lazy loading</li>
+        <li>Integrated REST and GraphQL APIs with efficient caching strategies</li>
+      </ul>
+    </div>
+
+    <div class="exp-item animate-in">
+      <div class="exp-date">JUN 2019 — FEB 2021</div>
+      <div class="exp-role">Junior Frontend Developer</div>
+      <div class="exp-company">@ KeBooK</div>
+      <ul class="exp-details">
+        <li>Built responsive interfaces with React and CSS-in-JS, mobile-first</li>
+        <li>Developed reusable component library — 20% faster feature dev</li>
+        <li>Collaborated on RESTful API design and integrations</li>
+        <li>Active in agile ceremonies: sprint planning, daily standups</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="retro-divider">◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
+
+<!-- PROJECTS -->
+<section class="section" id="projects">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2 class="section-title">KEY QUESTS</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="projects-grid">
+
+    <div class="project-card animate-in">
+      <div class="project-label">Featured Project</div>
+      <div class="project-name">ESH — Server Access Management</div>
+      <p class="project-desc">Architecting a centralized server access platform with session recording capabilities, targeting mid-market enterprise clients.</p>
+    </div>
+
+    <div class="project-card animate-in">
+      <div class="project-label">Full-Stack Achievement</div>
+      <div class="project-name">RDP Web Integration</div>
+      <p class="project-desc">Built end-to-end remote desktop solution connecting React frontend through Laravel API to Apache Guacamole — browser-based RDP access to Windows Server 2022 on AWS EC2.</p>
+    </div>
+
+    <div class="project-card animate-in">
+      <div class="project-label">Design System Lead</div>
+      <div class="project-name">Component Library</div>
+      <p class="project-desc">Created comprehensive component library with Storybook documentation, adopted across multiple product teams for consistent UI/UX delivery.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="retro-divider">═══════════════════════════════════════════════</div>
+
+<!-- HOBBIES -->
+<section class="section" id="hobbies">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <h2 class="section-title">SIDE QUESTS</h2>
+    <span class="section-line"></span>
+  </div>
+  <div class="hobbies-grid">
+
+    <div class="hobby-card animate-in">
+      <span class="hobby-icon">⚽</span>
+      <div class="hobby-name">AMATEUR SOCCER</div>
+      <div class="hobby-desc">Hitting the field for some weekend matches — teamwork on and off the screen!</div>
+    </div>
+
+    <div class="hobby-card animate-in">
+      <span class="hobby-icon">🎮</span>
+      <div class="hobby-name">YU-GI-OH! GX</div>
+      <div class="hobby-desc">Tag Force duels on the PSP — get your game on! Time to d-d-d-duel!</div>
+    </div>
+
+    <div class="hobby-card animate-in">
+      <span class="hobby-icon">👨‍👩‍👧‍👦</span>
+      <div class="hobby-name">FAMILY & FRIENDS</div>
+      <div class="hobby-desc">Quality time with the people who matter most — the best multiplayer experience.</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="retro-divider">▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░</div>
+
+<!-- EDUCATION -->
+<section class="section" id="education">
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <h2 class="section-title">TRAINING ARC</h2>
+    <span class="section-line"></span>
+  </div>
+
+  <div class="edu-block animate-in">
+    <span class="edu-icon">🎓</span>
+    <div>
+      <div class="edu-degree">Systems Analysis & Development</div>
+      <div class="edu-school">FAEL</div>
+    </div>
+  </div>
+
+  <div class="languages-block animate-in">
+    <div class="skill-category" style="margin-bottom: 1.2rem;">LANGUAGE PROFICIENCY</div>
+    <div class="lang-row">
+      <span class="lang-name">PORTUGUESE</span>
+      <div class="lang-bar-bg">
+        <div class="lang-bar-fill" data-width="100" style="width: 0%;"></div>
+      </div>
+      <span class="lang-level">Native</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name">ENGLISH</span>
+      <div class="lang-bar-bg">
+        <div class="lang-bar-fill" data-width="80" style="width: 0%;"></div>
+      </div>
+      <span class="lang-level">Professional</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <h2 class="contact-title animate-in">READY TO<br>CONNECT?</h2>
+  <p class="contact-text animate-in">
+    Open to remote opportunities worldwide.<br>Let's build something awesome together.
+  </p>
+  <div class="contact-links animate-in">
+    <a href="mailto:kuster@live.com" class="contact-link">📧 kuster@live.com</a>
+    <a href="https://github.com/olajoao" target="_blank" class="contact-link">🐙 GitHub</a>
+    <a href="https://linkedin.com/in/joaokusterv" target="_blank" class="contact-link">💼 LinkedIn</a>
+  </div>
+</section>
+
+<footer>
+  <p>Built with <span class="heart">♥</span> by João Küster — 2025</p>
+  <p style="margin-top: 0.3rem; font-size: 14px;">// INSERT COIN TO CONTINUE</p>
+</footer>
+
+<script>
+// Intersection Observer for scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, index) => {
+    if (entry.isIntersecting) {
+      // Stagger animations slightly
+      const delay = entry.target.dataset.delay || 0;
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, delay);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.animate-in').forEach((el, i) => {
+  el.dataset.delay = (i % 4) * 100;
+  observer.observe(el);
+});
+
+// Animate language bars on scroll
+const langObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const fills = entry.target.querySelectorAll('.lang-bar-fill');
+      fills.forEach((fill, i) => {
+        setTimeout(() => {
+          fill.style.width = fill.dataset.width + '%';
+        }, i * 300);
+      });
+      langObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.languages-block').forEach(el => langObserver.observe(el));
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function() {
+  // ====== SCENE SETUP ======
+  const canvas = document.getElementById('character-canvas');
+  const container = canvas.parentElement;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  camera.position.set(0, 3.5, 20);
+  camera.lookAt(0, 2.5, 0);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true,
+    alpha: true
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  function resize() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ====== LIGHTING ======
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  mainLight.position.set(5, 10, 7);
+  mainLight.castShadow = true;
+  mainLight.shadow.mapSize.set(1024, 1024);
+  scene.add(mainLight);
+
+  const fillLight = new THREE.DirectionalLight(0x7B40C9, 0.2);
+  fillLight.position.set(-5, 3, -5);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x00fff7, 0.2);
+  rimLight.position.set(0, 5, -8);
+  scene.add(rimLight);
+
+  // Magical glow from below
+  const underGlow = new THREE.PointLight(0x7B40C9, 0.35, 15);
+  underGlow.position.set(0, -3, 2);
+  scene.add(underGlow);
+
+  // Specular highlight for armor shine
+  const specLight = new THREE.PointLight(0xffffff, 0.4, 20);
+  specLight.position.set(3, 8, 6);
+  scene.add(specLight);
+
+  // ====== MATERIALS ======
+  function mat(color, opts = {}) {
+    return new THREE.MeshStandardMaterial({
+      color: color,
+      roughness: opts.roughness !== undefined ? opts.roughness : 0.7,
+      metalness: opts.metalness !== undefined ? opts.metalness : 0.05,
+      ...opts
+    });
+  }
+
+  // Dark Magician color palette (richer, more metallic like card art)
+  const deepPurple = 0x3A1F6E;
+  const midPurple = 0x6B35A8;
+  const lavender = 0xB88ADE;
+  const lightLavender = 0xD4AAFF;
+  const robeBlue = 0x2A1B6E;
+  const robeDarkBlue = 0x1A1155;
+  const armorPurple = 0x6A3CA0;
+  const armorDark = 0x2E1A55;
+  const armorShiny = 0x8855CC;
+  const skinTone = 0xA0724E;
+  const staffTeal = 0x40C9A2;
+  const staffDarkTeal = 0x2A9E7E;
+  const staffGem = 0x50E8B8;
+  const eyeBlack = 0x0a0a0a;
+
+  const deepPurpleMat = mat(deepPurple);
+  const midPurpleMat = mat(midPurple, { roughness: 0.45, metalness: 0.15 });
+  const lavenderMat = mat(lavender, { roughness: 0.35, metalness: 0.2 });
+  const lightLavMat = mat(lightLavender, { roughness: 0.3, metalness: 0.2 });
+  const robeMat = mat(robeBlue, { roughness: 0.75 });
+  const robeDarkMat = mat(robeDarkBlue, { roughness: 0.8 });
+  const armorMat = mat(armorPurple, { roughness: 0.3, metalness: 0.45 });
+  const armorDarkMat = mat(armorDark, { roughness: 0.35, metalness: 0.4 });
+  const armorShinyMat = mat(armorShiny, { roughness: 0.2, metalness: 0.55 });
+  const skinMat = mat(skinTone, { roughness: 0.6 });
+  const staffMat = mat(staffTeal, { roughness: 0.35, metalness: 0.2 });
+  const staffDarkMat = mat(staffDarkTeal, { roughness: 0.4 });
+  const gemMat = mat(staffGem, { roughness: 0.15, metalness: 0.15, emissive: staffGem, emissiveIntensity: 0.6 });
+  const eyeMat = mat(eyeBlack, { roughness: 0.15, metalness: 0.1 });
+
+  // ====== HELPER ======
+  function box(w, h, d, material, x, y, z) {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  // ====== CHARACTER GROUP ======
+  const character = new THREE.Group();
+
+  // ================================
+  //  HAT — Iconic pointed hat with HORN PROTRUSIONS
+  // ================================
+  const hatGroup = new THREE.Group();
+
+  // Hat brim base
+  hatGroup.add(box(2.9, 0.18, 2.9, deepPurpleMat, 0, 9.55, -0.15));
+
+  // Hat body layers (bottom to top, narrowing)
+  hatGroup.add(box(2.55, 0.55, 2.55, deepPurpleMat, 0, 9.95, -0.15));
+  hatGroup.add(box(2.6, 0.16, 2.6, lavenderMat, 0, 10.28, -0.15));
+
+  hatGroup.add(box(2.2, 0.55, 2.2, midPurpleMat, 0, 10.58, -0.1));
+  hatGroup.add(box(2.25, 0.16, 2.25, lavenderMat, 0, 10.9, -0.1));
+
+  hatGroup.add(box(1.8, 0.55, 1.8, deepPurpleMat, 0, 11.2, -0.05));
+  hatGroup.add(box(1.85, 0.16, 1.85, lavenderMat, 0, 11.52, -0.05));
+
+  hatGroup.add(box(1.35, 0.55, 1.35, midPurpleMat, 0, 11.82, 0));
+  hatGroup.add(box(1.4, 0.14, 1.4, lightLavMat, 0, 12.12, 0));
+
+  hatGroup.add(box(0.95, 0.5, 0.95, deepPurpleMat, 0, 12.4, 0.05));
+  hatGroup.add(box(0.65, 0.45, 0.65, midPurpleMat, 0, 12.85, 0.1));
+
+  // Pointy tip (curving forward more dramatically like card art)
+  const tip1 = box(0.42, 0.5, 0.42, armorShinyMat, 0, 13.3, 0.18);
+  tip1.rotation.x = 0.15;
+  hatGroup.add(tip1);
+
+  const tip2 = box(0.28, 0.5, 0.28, midPurpleMat, 0, 13.75, 0.35);
+  tip2.rotation.x = 0.28;
+  hatGroup.add(tip2);
+
+  const tip3 = box(0.18, 0.45, 0.18, armorShinyMat, 0, 14.15, 0.55);
+  tip3.rotation.x = 0.38;
+  hatGroup.add(tip3);
+
+  const tipTop = box(0.12, 0.35, 0.12, lavenderMat, 0, 14.5, 0.75);
+  tipTop.rotation.x = 0.45;
+  hatGroup.add(tipTop);
+
+  // Hat side drapes
+  hatGroup.add(box(0.22, 1.3, 1.7, deepPurpleMat, -1.38, 9.0, -0.15));
+  hatGroup.add(box(0.18, 0.9, 1.4, midPurpleMat, -1.38, 8.05, -0.15));
+  hatGroup.add(box(0.25, 0.12, 1.75, lavenderMat, -1.38, 9.65, -0.15));
+
+  hatGroup.add(box(0.22, 1.3, 1.7, deepPurpleMat, 1.38, 9.0, -0.15));
+  hatGroup.add(box(0.18, 0.9, 1.4, midPurpleMat, 1.38, 8.05, -0.15));
+  hatGroup.add(box(0.25, 0.12, 1.75, lavenderMat, 1.38, 9.65, -0.15));
+
+  // Back drape
+  hatGroup.add(box(2.3, 1.5, 0.22, deepPurpleMat, 0, 8.8, -1.15));
+  hatGroup.add(box(1.8, 0.8, 0.18, midPurpleMat, 0, 7.85, -1.1));
+  hatGroup.add(box(2.35, 0.12, 0.25, lavenderMat, 0, 9.55, -1.15));
+
+  // Front visor (more angular)
+  hatGroup.add(box(2.6, 0.32, 0.22, armorShinyMat, 0, 9.5, 1.05));
+  hatGroup.add(box(2.65, 0.12, 0.24, lavenderMat, 0, 9.32, 1.07));
+  // Visor center gem
+  hatGroup.add(box(0.22, 0.22, 0.12, gemMat, 0, 9.5, 1.14));
+
+  character.add(hatGroup);
+
+  // ================================
+  //  HEAD — Funko Pop oversized
+  // ================================
+  const headGroup = new THREE.Group();
+  headGroup.add(box(2.55, 2.2, 2.3, skinMat, 0, 8.25, 0.1));
+  headGroup.add(box(2.35, 0.3, 2.1, skinMat, 0, 9.4, 0.05));
+  headGroup.add(box(2.1, 0.2, 1.8, skinMat, 0, 7.1, 0.1));
+  character.add(headGroup);
+
+  // ================================
+  //  FACE — Funko Pop big round eyes
+  // ================================
+  function funkoEye(cx, cy, cz) {
+    const g = new THREE.Group();
+    g.add(box(0.75, 0.75, 0.12, eyeMat, cx, cy, cz));
+    g.add(box(0.65, 0.85, 0.11, eyeMat, cx, cy, cz));
+    g.add(box(0.85, 0.65, 0.11, eyeMat, cx, cy, cz));
+    // Shiny reflection
+    g.add(box(0.18, 0.18, 0.06, mat(0xffffff, {roughness: 0.1}), cx + 0.18, cy + 0.18, cz + 0.07));
+    g.add(box(0.1, 0.1, 0.05, mat(0xffffff, {roughness: 0.1}), cx - 0.12, cy + 0.08, cz + 0.07));
+    return g;
+  }
+
+  character.add(funkoEye(-0.58, 8.3, 1.22));
+  character.add(funkoEye(0.58, 8.3, 1.22));
+
+  // Tiny nose
+  character.add(box(0.14, 0.1, 0.1, mat(0x8F6443), 0, 7.9, 1.24));
+
+  // ================================
+  //  BODY — Small Funko proportions
+  // ================================
+  character.add(box(0.55, 0.3, 0.5, skinMat, 0, 6.95, 0.05));
+
+  // Shoulder armor (more layered, angular like card art)
+  const lShoulder = new THREE.Group();
+  lShoulder.add(box(0.9, 0.35, 0.9, armorShinyMat, 0, 0, 0));
+  lShoulder.add(box(0.7, 0.2, 0.7, armorDarkMat, 0, 0.24, 0));
+  lShoulder.add(box(0.5, 0.15, 0.5, armorShinyMat, 0, 0.38, 0));
+  lShoulder.add(box(0.95, 0.1, 0.95, lavenderMat, 0, -0.14, 0));
+  // Shoulder spike
+  const lSpike = box(0.15, 0.35, 0.15, lavenderMat, -0.25, 0.45, 0);
+  lSpike.rotation.z = 0.3;
+  lShoulder.add(lSpike);
+  lShoulder.position.set(-1.2, 6.55, 0);
+  character.add(lShoulder);
+
+  const rShoulder = new THREE.Group();
+  rShoulder.add(box(0.9, 0.35, 0.9, armorShinyMat, 0, 0, 0));
+  rShoulder.add(box(0.7, 0.2, 0.7, armorDarkMat, 0, 0.24, 0));
+  rShoulder.add(box(0.5, 0.15, 0.5, armorShinyMat, 0, 0.38, 0));
+  rShoulder.add(box(0.95, 0.1, 0.95, lavenderMat, 0, -0.14, 0));
+  const rSpike = box(0.15, 0.35, 0.15, lavenderMat, 0.25, 0.45, 0);
+  rSpike.rotation.z = -0.3;
+  rShoulder.add(rSpike);
+  rShoulder.position.set(1.2, 6.55, 0);
+  character.add(rShoulder);
+
+  // Chest armor (more detailed, shinier)
+  character.add(box(2.0, 0.55, 1.1, armorDarkMat, 0, 6.45, 0));
+  character.add(box(1.6, 0.22, 1.0, armorShinyMat, 0, 6.8, 0));
+  // Chest center vertical detail
+  character.add(box(0.18, 0.55, 0.15, lavenderMat, 0, 6.45, 0.56));
+  // Chest side highlights
+  character.add(box(0.12, 0.35, 0.12, armorShinyMat, -0.5, 6.5, 0.54));
+  character.add(box(0.12, 0.35, 0.12, armorShinyMat, 0.5, 6.5, 0.54));
+
+  // Main robe body
+  character.add(box(1.8, 1.4, 1.1, robeMat, 0, 5.45, 0));
+  character.add(box(1.85, 0.18, 1.15, armorMat, 0, 6.05, 0));
+  // Belt gem
+  character.add(box(0.25, 0.2, 0.16, gemMat, 0, 6.05, 0.6));
+
+  // ★ LARGE SPIRAL EMBLEM on chest/robe (iconic from card art) ★
+  // Outer spiral ring
+  character.add(box(0.7, 0.7, 0.1, armorDarkMat, 0, 5.3, 0.58));
+  character.add(box(0.6, 0.8, 0.1, armorDarkMat, 0, 5.3, 0.58));
+  // Inner spiral
+  character.add(box(0.5, 0.5, 0.1, armorShinyMat, 0, 5.3, 0.62));
+  character.add(box(0.4, 0.6, 0.1, armorShinyMat, 0, 5.3, 0.62));
+  // Spiral center
+  character.add(box(0.25, 0.25, 0.1, lavenderMat, 0, 5.3, 0.66));
+  // Spiral arm segments (clockwise swirl)
+  character.add(box(0.3, 0.1, 0.08, lavenderMat, 0.15, 5.5, 0.68));
+  character.add(box(0.1, 0.25, 0.08, lavenderMat, 0.28, 5.35, 0.68));
+  character.add(box(0.25, 0.1, 0.08, lavenderMat, 0.1, 5.12, 0.68));
+  character.add(box(0.1, 0.2, 0.08, lavenderMat, -0.12, 5.25, 0.68));
+
+  // Robe skirt (flowing wider, more dramatic)
+  character.add(box(2.0, 0.55, 1.3, robeDarkMat, 0, 4.45, 0));
+  character.add(box(2.2, 0.55, 1.4, robeMat, 0, 3.85, 0));
+  character.add(box(2.4, 0.45, 1.5, robeDarkMat, 0, 3.3, 0));
+  character.add(box(2.6, 0.38, 1.6, robeMat, 0, 2.85, 0));
+  // Bottom trim (double lavender line)
+  character.add(box(2.65, 0.1, 1.65, lavenderMat, 0, 2.68, 0));
+  character.add(box(2.55, 0.06, 1.55, lightLavMat, 0, 2.58, 0));
+
+  // Robe front center line
+  character.add(box(0.14, 1.9, 0.08, lavenderMat, 0, 4.15, 0.72));
+  // Robe side fold highlights
+  character.add(box(0.1, 1.35, 0.55, midPurpleMat, -0.85, 4.15, 0));
+  character.add(box(0.1, 1.35, 0.55, midPurpleMat, 0.85, 4.15, 0));
+  // Robe lower side armor accents
+  character.add(box(0.15, 0.5, 0.12, armorShinyMat, -0.95, 3.5, 0.55));
+  character.add(box(0.15, 0.5, 0.12, armorShinyMat, 0.95, 3.5, 0.55));
+
+  // Arms (more armored, with bands)
+  const leftArm = new THREE.Group();
+  leftArm.add(box(0.55, 0.75, 0.55, armorShinyMat, -1.3, 5.95, 0));
+  leftArm.add(box(0.58, 0.1, 0.58, lavenderMat, -1.3, 5.55, 0));
+  leftArm.add(box(0.5, 0.75, 0.5, midPurpleMat, -1.3, 5.1, 0));
+  leftArm.add(box(0.54, 0.12, 0.54, lavenderMat, -1.3, 4.68, 0));
+  leftArm.add(box(0.34, 0.34, 0.3, skinMat, -1.3, 4.38, 0));
+  character.add(leftArm);
+
+  const rightArm = new THREE.Group();
+  rightArm.add(box(0.55, 0.75, 0.55, armorShinyMat, 1.3, 5.95, 0));
+  rightArm.add(box(0.58, 0.1, 0.58, lavenderMat, 1.3, 5.55, 0));
+  rightArm.add(box(0.5, 0.75, 0.5, midPurpleMat, 1.3, 5.1, 0));
+  rightArm.add(box(0.54, 0.12, 0.54, lavenderMat, 1.3, 4.68, 0));
+  rightArm.add(box(0.34, 0.34, 0.3, skinMat, 1.3, 4.38, 0));
+  character.add(rightArm);
+
+  // Feet
+  character.add(box(0.48, 0.28, 0.65, armorDarkMat, -0.4, 2.5, 0.1));
+  character.add(box(0.48, 0.28, 0.65, armorDarkMat, 0.4, 2.5, 0.1));
+
+  // ================================
+  //  STAFF — Green staff with ORB top (like card art)
+  // ================================
+  const staffGroup = new THREE.Group();
+
+  // Pole
+  staffGroup.add(box(0.14, 5.2, 0.14, staffDarkMat, 0, 4.5, 0));
+  // Grip wraps
+  for (let i = 0; i < 7; i++) {
+    staffGroup.add(box(0.2, 0.08, 0.2, staffMat, 0, 2.3 + i * 0.5, 0));
+  }
+
+  // Staff head — ornate holder
+  staffGroup.add(box(0.4, 0.3, 0.4, staffDarkMat, 0, 7.15, 0));
+  // Wing-like ornament extensions
+  staffGroup.add(box(1.0, 0.14, 0.14, staffMat, 0, 7.35, 0));
+  staffGroup.add(box(0.8, 0.1, 0.12, staffDarkMat, 0, 7.48, 0));
+  // Prongs curving up
+  const lProng = box(0.12, 0.4, 0.12, staffMat, -0.38, 7.55, 0);
+  lProng.rotation.z = 0.2;
+  staffGroup.add(lProng);
+  const rProng = box(0.12, 0.4, 0.12, staffMat, 0.38, 7.55, 0);
+  rProng.rotation.z = -0.2;
+  staffGroup.add(rProng);
+  // Top spike
+  staffGroup.add(box(0.12, 0.35, 0.12, staffMat, 0, 8.0, 0));
+
+  // ★ GREEN ORB (the iconic glowing orb at the staff top) ★
+  // Build orb from overlapping boxes for round-ish look
+  staffGroup.add(box(0.45, 0.45, 0.45, gemMat, 0, 7.55, 0));
+  staffGroup.add(box(0.38, 0.52, 0.38, gemMat, 0, 7.55, 0));
+  staffGroup.add(box(0.52, 0.38, 0.38, gemMat, 0, 7.55, 0));
+  staffGroup.add(box(0.38, 0.38, 0.52, gemMat, 0, 7.55, 0));
+  // Orb inner glow (brighter core)
+  const orbCoreMat = mat(0x80FFD0, { roughness: 0.1, metalness: 0.1, emissive: 0x80FFD0, emissiveIntensity: 0.8 });
+  staffGroup.add(box(0.2, 0.2, 0.2, orbCoreMat, 0, 7.55, 0));
+
+  staffGroup.position.set(1.6, -1.5, 0.2);
+  staffGroup.rotation.z = -0.08;
+  character.add(staffGroup);
+
+  // ================================
+  //  PLATFORM — Purple magical glow
+  // ================================
+  const platformGeo = new THREE.CylinderGeometry(2.4, 2.4, 0.08, 32);
+  const platformMat = new THREE.MeshStandardMaterial({
+    color: 0x7B40C9,
+    roughness: 0.5,
+    metalness: 0.3,
+    emissive: 0x7B40C9,
+    emissiveIntensity: 0.2,
+    transparent: true,
+    opacity: 0.3
+  });
+  const platform = new THREE.Mesh(platformGeo, platformMat);
+  platform.position.set(0, 2.3, 0);
+  platform.receiveShadow = true;
+  character.add(platform);
+
+  // Magical particles
+  const particleGroup = new THREE.Group();
+  for (let i = 0; i < 10; i++) {
+    const angle = (i / 10) * Math.PI * 2;
+    const pr = 1.8 + Math.random() * 0.6;
+    const px = Math.cos(angle) * pr;
+    const pz = Math.sin(angle) * pr;
+    const particle = box(0.09, 0.09, 0.09, gemMat, px, 2.5 + Math.random() * 0.6, pz);
+    particleGroup.add(particle);
+  }
+  character.add(particleGroup);
+
+  // Center the character
+  character.position.set(0, -5.5, 0);
+  scene.add(character);
+
+
+  // ====== INTERACTION (Drag to rotate) ======
+  let isDragging = false;
+  let previousMouseX = 0;
+  let targetRotationY = 0;
+  let currentRotationY = 0;
+  let autoRotateSpeed = 0.004;
+  let autoRotate = true;
+
+  container.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    autoRotate = false;
+    previousMouseX = e.clientX;
+    container.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - previousMouseX;
+    targetRotationY += deltaX * 0.008;
+    previousMouseX = e.clientX;
+  });
+
+  window.addEventListener('pointerup', () => {
+    isDragging = false;
+    container.style.cursor = 'grab';
+    // Resume auto-rotate after 3 seconds
+    setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+  });
+
+  // Touch events
+  container.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    autoRotate = false;
+    previousMouseX = e.touches[0].clientX;
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - previousMouseX;
+    targetRotationY += deltaX * 0.008;
+    previousMouseX = e.touches[0].clientX;
+  }, { passive: true });
+
+  container.addEventListener('touchend', () => {
+    isDragging = false;
+    setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
+  });
+
+  // ====== ANIMATION LOOP ======
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    // Auto-rotate
+    if (autoRotate) {
+      targetRotationY += autoRotateSpeed;
+    }
+
+    // Smooth rotation
+    currentRotationY += (targetRotationY - currentRotationY) * 0.08;
+    character.rotation.y = currentRotationY;
+
+    // Idle floating bob
+    character.position.y = -5.5 + Math.sin(t * 1.2) * 0.12;
+
+    // Subtle robe sway (arms)
+    leftArm.rotation.z = Math.sin(t * 0.9) * 0.025;
+    rightArm.rotation.z = -Math.sin(t * 0.9) * 0.025;
+
+    // Staff gem pulse
+    gemMat.emissiveIntensity = 0.4 + Math.sin(t * 2.5) * 0.3;
+    orbCoreMat.emissiveIntensity = 0.6 + Math.sin(t * 3.0) * 0.4;
+
+    // Platform glow pulse
+    platform.material.emissiveIntensity = 0.15 + Math.sin(t * 1.8) * 0.1;
+
+    // Floating particles
+    particleGroup.children.forEach((p, i) => {
+      p.position.y = 2.5 + Math.sin(t * 1.5 + i * 0.7) * 0.4;
+      p.material.emissiveIntensity = 0.3 + Math.sin(t * 2 + i) * 0.3;
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+
+</body>
+</html>
