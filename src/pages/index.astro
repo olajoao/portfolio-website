@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Character from '../components/Character.astro';
+import RetroDivider from '../components/RetroDivider.astro';
+import Skills from '../components/Skills.astro';
+import Experience from '../components/Experience.astro';
+import Projects from '../components/Projects.astro';
+import Hobbies from '../components/Hobbies.astro';
+import Education from '../components/Education.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="João Küster — Senior Frontend Engineer">
+  <Nav />
+  <Hero />
+  <Character />
+  <RetroDivider pattern="═══════════════════════════════════════════════" />
+  <Skills />
+  <RetroDivider pattern="▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░" />
+  <Experience />
+  <RetroDivider pattern="◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆ ◇ ◆" />
+  <Projects />
+  <RetroDivider pattern="═══════════════════════════════════════════════" />
+  <Hobbies />
+  <RetroDivider pattern="▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░ ░▒▓ ▓▒░" />
+  <Education />
+  <Contact />
+  <Footer />
+</BaseLayout>
