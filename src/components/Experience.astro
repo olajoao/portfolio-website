@@ -1,0 +1,165 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+interface ExpItem {
+  date: string;
+  role: string;
+  company: string;
+  details: string[];
+}
+
+const experiences: ExpItem[] = [
+  {
+    date: 'JAN 2024 — PRESENT',
+    role: 'Senior Frontend Engineer',
+    company: '@ Eleven Soft',
+    details: [
+      'Led frontend architecture for production apps serving 50,000+ active users',
+      'Architected real-time communication with WebSockets, reducing latency by 40%',
+      'Implemented monitoring with Sentry & DataDog, decreasing incidents by 35%',
+      'Mentored 4 frontend developers on testing and coding standards',
+      'Drove TypeScript adoption, reducing runtime errors by 25%',
+    ],
+  },
+  {
+    date: 'NOV 2022 — DEC 2023',
+    role: 'Frontend Engineer',
+    company: '@ MYRP Gestão Empresarial',
+    details: [
+      'Migrated microfrontend architecture from Webpack to Vite — 55% faster builds',
+      'Built shared design system with 40+ components used across 8 apps',
+      'Led JS → TypeScript migration, cutting bug reports by 30%',
+      'Achieved 98% cross-browser compatibility with responsive designs',
+    ],
+  },
+  {
+    date: 'MAR 2021 — OCT 2022',
+    role: 'Frontend Developer',
+    company: '@ SaperX',
+    details: [
+      'Developed Vue.js apps for enterprise clients across 12+ releases',
+      'Increased test coverage from 45% to 85% with Jest & Cypress',
+      'Optimized load times by 40% via code splitting & lazy loading',
+      'Integrated REST and GraphQL APIs with efficient caching strategies',
+    ],
+  },
+  {
+    date: 'JUN 2019 — FEB 2021',
+    role: 'Junior Frontend Developer',
+    company: '@ KeBooK',
+    details: [
+      'Built responsive interfaces with React and CSS-in-JS, mobile-first',
+      'Developed reusable component library — 20% faster feature dev',
+      'Collaborated on RESTful API design and integrations',
+      'Active in agile ceremonies: sprint planning, daily standups',
+    ],
+  },
+];
+---
+
+<section class="section" id="experience">
+  <SectionHeader number="02" title="EXPERIENCE LOG" />
+  <div class="exp-timeline">
+    {experiences.map((exp) => (
+      <div class="exp-item animate-in">
+        <div class="exp-date">{exp.date}</div>
+        <div class="exp-role">{exp.role}</div>
+        <div class="exp-company">{exp.company}</div>
+        <ul class="exp-details">
+          {exp.details.map((detail) => (
+            <li>{detail}</li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .exp-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .exp-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--neon-green), var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+  }
+
+  .exp-item {
+    position: relative;
+    margin-bottom: 3rem;
+    padding-left: 2rem;
+  }
+
+  .exp-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 8px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--neon-green);
+    background: var(--dark-bg);
+    transform: translateX(-6px) rotate(45deg);
+    transition: all 0.3s;
+  }
+
+  .exp-item:hover::before {
+    background: var(--neon-green);
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
+  }
+
+  .exp-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--neon-pink);
+    text-shadow: 0 0 6px rgba(255, 45, 149, 0.3);
+    margin-bottom: 0.3rem;
+    letter-spacing: 1px;
+  }
+
+  .exp-role {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+    margin-bottom: 0.3rem;
+    line-height: 1.6;
+  }
+
+  .exp-company {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--neon-cyan);
+    margin-bottom: 1rem;
+  }
+
+  .exp-details {
+    list-style: none;
+  }
+
+  .exp-details li {
+    padding: 0.3rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 19px;
+    color: var(--text-body);
+  }
+
+  .exp-details li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--neon-green);
+  }
+
+  @media (max-width: 768px) {
+    .exp-item { padding-left: 1rem; }
+  }
+</style>

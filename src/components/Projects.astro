@@ -1,0 +1,101 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+interface Project {
+  label: string;
+  name: string;
+  desc: string;
+}
+
+const projects: Project[] = [
+  {
+    label: 'Featured Project',
+    name: 'ESH — Server Access Management',
+    desc: 'Architecting a centralized server access platform with session recording capabilities, targeting mid-market enterprise clients.',
+  },
+  {
+    label: 'Full-Stack Achievement',
+    name: 'RDP Web Integration',
+    desc: 'Built end-to-end remote desktop solution connecting React frontend through Laravel API to Apache Guacamole — browser-based RDP access to Windows Server 2022 on AWS EC2.',
+  },
+  {
+    label: 'Design System Lead',
+    name: 'Component Library',
+    desc: 'Created comprehensive component library with Storybook documentation, adopted across multiple product teams for consistent UI/UX delivery.',
+  },
+];
+---
+
+<section class="section" id="projects">
+  <SectionHeader number="03" title="KEY QUESTS" />
+  <div class="projects-grid">
+    {projects.map((project) => (
+      <div class="project-card animate-in">
+        <div class="project-label">{project.label}</div>
+        <div class="project-name">{project.name}</div>
+        <p class="project-desc">{project.desc}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .project-card:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 25px rgba(0, 255, 247, 0.08);
+  }
+
+  .project-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--neon-cyan), var(--neon-pink));
+    transform: scaleX(0);
+    transition: transform 0.4s;
+    transform-origin: left;
+  }
+
+  .project-card:hover::after { transform: scaleX(1); }
+
+  .project-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--neon-pink);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 8px rgba(255, 230, 0, 0.3);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .project-desc {
+    font-size: 19px;
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+</style>

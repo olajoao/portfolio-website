@@ -1,0 +1,70 @@
+<section class="character-section" id="character">
+  <div class="character-container">
+    <canvas id="character-canvas"></canvas>
+    <div class="character-hint">
+      <span class="hint-icon">↻</span> DRAG TO ROTATE — KÜSTER MAGICIAN
+    </div>
+  </div>
+</section>
+
+<script src="../scripts/character-scene.ts"></script>
+
+<style>
+  .character-section {
+    padding: 2rem 2rem 4rem;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .character-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1 / 1.1;
+    cursor: grab;
+  }
+
+  .character-container:active { cursor: grabbing; }
+
+  #character-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .character-hint {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 247, 0.5), 0 0 25px rgba(0, 255, 247, 0.2);
+    letter-spacing: 2px;
+    opacity: 1;
+    animation: hintPulse 3s ease-in-out infinite;
+    white-space: nowrap;
+  }
+
+  .hint-icon {
+    display: inline-block;
+    animation: hintSpin 2s linear infinite;
+  }
+
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes hintSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 768px) {
+    .character-container { max-width: 350px; }
+  }
+</style>

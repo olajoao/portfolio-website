@@ -1,0 +1,114 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+interface SkillCard {
+  icon: string;
+  category: string;
+  tags: string[];
+}
+
+const skills: SkillCard[] = [
+  {
+    icon: '⌨️',
+    category: 'LANGUAGES & CORE',
+    tags: ['JavaScript (ES6+)', 'TypeScript', 'NodeJS', 'Go', 'Scalability', 'Performance', 'Clean Code', 'SEO'],
+  },
+  {
+    icon: '⚛️',
+    category: 'FRAMEWORKS & LIBS',
+    tags: ['React', 'Vue.js', 'Next.js', 'Nuxt.js', 'TailwindCSS', 'Styled Components'],
+  },
+  {
+    icon: '📡',
+    category: 'STATE & DATA',
+    tags: ['Redux', 'Vuex', 'Pinia', 'Tanstack', 'GraphQL', 'REST APIs', 'WebSockets', 'PostgreSQL', 'MongoDB'],
+  },
+  {
+    icon: '🧪',
+    category: 'TESTING & QUALITY',
+    tags: ['Jest', 'Vitest', 'Cypress', 'Testing Library', 'ESLint', 'Prettier'],
+  },
+  {
+    icon: '🛠️',
+    category: 'DEVOPS & TOOLS',
+    tags: ['Git', 'Docker', 'CI/CD', 'Webpack', 'Vite', 'Sentry', 'DataDog', 'AWS', 'Linux'],
+  },
+];
+---
+
+<section class="section" id="skills">
+  <SectionHeader number="01" title="SKILL TREE" />
+  <div class="skills-grid">
+    {skills.map((skill) => (
+      <div class="skill-card animate-in" data-icon={skill.icon}>
+        <div class="skill-category">{skill.category}</div>
+        <div class="skill-tags">
+          {skill.tags.map((tag) => (
+            <span class="skill-tag">{tag}</span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .skill-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .skill-card:hover {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .skill-card::before {
+    content: attr(data-icon);
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 24px;
+  }
+
+  .skill-category {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 6px rgba(255, 230, 0, 0.3);
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .skill-tag {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    padding: 0.3rem 0.8rem;
+    background: rgba(57, 255, 20, 0.05);
+    border: 1px solid rgba(57, 255, 20, 0.15);
+    color: var(--neon-green);
+    transition: all 0.2s;
+  }
+
+  .skill-tag:hover {
+    background: rgba(57, 255, 20, 0.12);
+    border-color: var(--neon-green);
+    text-shadow: 0 0 6px rgba(57, 255, 20, 0.4);
+  }
+</style>

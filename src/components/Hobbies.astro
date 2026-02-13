@@ -1,0 +1,83 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+interface Hobby {
+  icon: string;
+  name: string;
+  desc: string;
+}
+
+const hobbies: Hobby[] = [
+  {
+    icon: '⚽',
+    name: 'AMATEUR SOCCER',
+    desc: 'Hitting the field for some weekend matches — teamwork on and off the screen!',
+  },
+  {
+    icon: '🎮',
+    name: 'YU-GI-OH! GX',
+    desc: 'Tag Force duels on the PSP — get your game on! Time to d-d-d-duel!',
+  },
+  {
+    icon: '👨‍👩‍👧‍👦',
+    name: 'FAMILY & FRIENDS',
+    desc: 'Quality time with the people who matter most — the best multiplayer experience.',
+  },
+];
+---
+
+<section class="section" id="hobbies">
+  <SectionHeader number="04" title="SIDE QUESTS" />
+  <div class="hobbies-grid">
+    {hobbies.map((hobby) => (
+      <div class="hobby-card animate-in">
+        <span class="hobby-icon">{hobby.icon}</span>
+        <div class="hobby-name">{hobby.name}</div>
+        <div class="hobby-desc">{hobby.desc}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .hobbies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .hobby-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .hobby-card:hover {
+    border-color: var(--neon-yellow);
+    box-shadow: 0 0 20px rgba(255, 230, 0, 0.08);
+    transform: translateY(-4px);
+  }
+
+  .hobby-icon {
+    font-size: 48px;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .hobby-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 8px rgba(255, 230, 0, 0.3);
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .hobby-desc {
+    font-size: 18px;
+    color: var(--text-dim);
+  }
+</style>
